@@ -369,3 +369,165 @@ function shuffleQuestions(){
  }
 }
 <button onclick="openAnimeSettings()">⚙️ الإعدادات</button>
+
+
+<!-- ANIME MASTER SETTINGS -->
+<style>
+#animeSettings {
+  background: #100d1c;
+  color: white;
+  padding: 22px;
+  border-radius: 18px;
+  border: 1px solid #8b45ff;
+  max-width: 450px;
+  margin: 20px auto;
+  font-family: Arial, sans-serif;
+}
+#animeSettings h2 {
+  color: #bd83ff;
+  text-align: center;
+}
+#animeSettings .setting {
+  background: #211832;
+  padding: 13px;
+  border-radius: 12px;
+  margin: 10px 0;
+}
+#animeSettings button,
+#animeSettings select {
+  background: #813cff;
+  color: white;
+  border: 0;
+  padding: 10px;
+  border-radius: 9px;
+  margin: 5px;
+  cursor: pointer;
+}
+#animeSettings select {
+  background: #302044;
+}
+#animeSettings.light {
+  background: #f1eaff;
+  color: #211832;
+}
+#animeSettings.light .setting {
+  background: #dfd0fa;
+}
+#animeSettings button:hover {
+  background: #a66aff;
+}
+</style>
+
+<div id="animeSettings" hidden>
+  <h2>⚙️ إعدادات Anime Master</h2>
+
+  <div class="setting">
+    🔊 الأصوات
+    <input type="checkbox" id="animeSound" checked>
+  </div>
+
+  <div class="setting">
+    🎵 موسيقى الأنمي
+    <input type="checkbox" id="animeMusic" checked>
+  </div>
+
+  <div class="setting">
+    🎶 اختيار الأنمي:
+    <select id="animeSong">
+      <option value="random">🔀 عشوائي</option>
+      <option value="naruto">🍥 ناروتو</option>
+      <option value="onepiece">☠️ ون بيس</option>
+      <option value="attack">⚔️ هجوم العمالقة</option>
+      <option value="demon">🗡️ قاتل الشياطين</option>
+      <option value="dragon">🐉 دراغون بول</option>
+    </select>
+  </div>
+
+  <div class="setting">
+    🌙 المظهر:
+    <button onclick="animeTheme('dark')">داكن</button>
+    <button onclick="animeTheme('light')">فاتح</button>
+  </div>
+
+  <div class="setting">
+    🌐 اللغة:
+    <button onclick="animeLanguage('ar')">العربية</button>
+    <button onclick="animeLanguage('en')">English</button>
+  </div>
+
+  <div class="setting">
+    👤 اللاعب:
+    <span id="animePlayerName">لاعب</span>
+  </div>
+
+  <div class="setting">
+    🔄 إعادة تعيين التقدم
+    <button onclick="animeReset()">إعادة تعيين</button>
+  </div>
+
+  <div class="setting">
+    🚪 تسجيل الخروج
+    <button onclick="animeLogout()">خروج</button>
+  </div>
+
+  <button onclick="closeAnimeSettings()">⬅️ العودة للعبة</button>
+</div>
+
+<script>
+const animeBox = document.getElementById("animeSettings");
+
+function openAnimeSettings() {
+  animeBox.hidden = false;
+}
+
+function closeAnimeSettings() {
+  animeBox.hidden = true;
+}
+
+function animeTheme(theme) {
+  animeBox.classList.toggle("light", theme === "light");
+  localStorage.setItem("animeTheme", theme);
+}
+
+function animeLanguage(lang) {
+  localStorage.setItem("animeLanguage", lang);
+  alert(lang === "ar" ? "تم اختيار العربية" : "English selected");
+}
+
+function animeReset() {
+  if (confirm("هل أنت متأكد من إعادة تعيين تقدمك؟")) {
+    localStorage.removeItem("animeProgress");
+    localStorage.removeItem("animeCoins");
+    localStorage.removeItem("animeHearts");
+    location.reload();
+  }
+}
+
+function animeLogout() {
+  if (confirm("هل تريد تسجيل الخروج؟")) {
+    localStorage.removeItem("animeLoggedIn");
+    location.reload();
+  }
+}
+
+function animeSaveSettings() {
+  localStorage.setItem("animeSound",
+    document.getElementById("animeSound").checked);
+  localStorage.setItem("animeMusic",
+    document.getElementById("animeMusic").checked);
+  localStorage.setItem("animeSong",
+    document.getElementById("animeSong").value);
+}
+
+["animeSound", "animeMusic", "animeSong"].forEach(id => {
+  document.getElementById(id).addEventListener("change", animeSaveSettings);
+});
+
+animeTheme(localStorage.getItem("animeTheme") || "dark");
+document.getElementById("animeSound").checked =
+  localStorage.getItem("animeSound") !== "false";
+document.getElementById("animeMusic").checked =
+  localStorage.getItem("animeMusic") !== "false";
+document.getElementById("animeSong").value =
+  localStorage.getItem("animeSong") || "random";
+</script>
