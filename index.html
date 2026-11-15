@@ -12,13 +12,15 @@ h1{color:#d8a5ff;font-size:34px;text-shadow:0 0 18px #a34cff}
 .panel{max-width:520px;margin:15px auto;background:#21183a;border:1px solid #7042a5;border-radius:18px;padding:18px;box-shadow:0 8px 25px #0008}
 input{width:90%;padding:13px;border:0;border-radius:10px;font-size:17px;text-align:center;margin:8px}
 button{border:0;border-radius:12px;padding:12px 17px;margin:6px;background:#8e44db;color:white;font-size:16px;font-weight:bold;cursor:pointer}
-button:disabled{opacity:.4}
-button:hover{filter:brightness(1.15)}
+button:disabled{opacity:.65;cursor:not-allowed}
+button:hover:not(:disabled){filter:brightness(1.15)}
 .stats{display:flex;justify-content:space-around;gap:8px;flex-wrap:wrap;font-size:18px}
 .character{display:inline-block;padding:10px;margin:5px;background:#352650;border-radius:12px;cursor:pointer;border:2px solid transparent}
 .character.selected{border-color:#d69cff;background:#57317b}
 #question{font-size:22px;line-height:1.6}
 .answer{display:block;width:100%;background:#352650}
+.answer.correct{background:#159447!important;border:2px solid #42ff83}
+.answer.wrong{background:#c62828!important;border:2px solid #ff7777}
 #message{min-height:28px;color:#ffd36a}
 .small{color:#c9b8df;font-size:13px}
 .hidden{display:none}
@@ -47,13 +49,14 @@ button:hover{filter:brightness(1.15)}
 <div class="character" data-name="توكا">🪽 توكا</div>
 </div>
 <button onclick="startGame()">ابدأ اللعب 🚀</button>
+<button onclick="continueGame()">متابعة الحفظ 💾</button>
 </div>
 
 <div class="panel hidden" id="game">
 <h2 id="welcome"></h2>
 <div class="stats">
 <div>❤️ <span id="hearts">5</span></div>
-<div>🪙 <span id="coins">0</span></div>
+<div>🪙 <span id="coins">50</span></div>
 <div>🏆 <span id="level">1</span>/50</div>
 </div>
 <hr>
@@ -67,7 +70,7 @@ button:hover{filter:brightness(1.15)}
 </div>
 
 <div class="panel hidden" id="end">
-<h2 id="endTitle">انتهت اللعبة!</h2>
+<h2 id="endTitle"></h2>
 <p id="endText"></p>
 <button onclick="restartGame()">العب من جديد 🔄</button>
 </div>
@@ -80,7 +83,7 @@ const questions = [
 {q:"ما اسم والد ناروتو؟",a:["هيروزن","ميناتو","جيرايا","كاكاشي"],c:1,h:"الهوكاغي الرابع."},
 {q:"ما الوحش المختوم داخل ناروتو؟",a:["التنين","الثعلب ذو التسعة ذيول","النمر","الذئب"],c:1,h:"كوراما."},
 {q:"ما اسم بطل ون بيس؟",a:["زورو","سانجي","لوفي","أوسوب"],c:2,h:"يحلم بأن يصبح ملك القراصنة."},
-{q:"ما اسم سيف زورو؟",a:["إنما","إكسكاليبر","دوراندال","أم نو هاباكيري فقط"],c:0,h:"أحد سيوفه الشهيرة."},
+{q:"ما اسم سيف زورو؟",a:["إنما","إكسكاليبر","دوراندال","زابيمارو"],c:0,h:"أحد سيوفه الشهيرة."},
 {q:"ما حلم لوفي؟",a:["أن يصبح هوكاغي","ملك القراصنة","أفضل سياف","أمير البحار"],c:1,h:"يريد الوصول إلى ون بيس."},
 {q:"ما اسم طباخ طاقم قبعة القش؟",a:["فرانكي","بروك","سانجي","جينبي"],c:2,h:"يقاتل غالباً برجليه."},
 {q:"ما اسم ملاح طاقم لوفي؟",a:["نامي","روبين","هانكوك","فيفي"],c:0,h:"تحب المال والبرتقال."},
@@ -114,10 +117,10 @@ const questions = [
 {q:"ما القوة التي يحصل عليها جين وو؟",a:["التحكم بالوقت","نظام يرفع مستواه","الطيران فقط","قراءة الأفكار"],c:1,h:"يصبح أقوى مع الخبرة."},
 {q:"ما اسم بطل بوكو نو هيرو؟",a:["باكوغو","تودوروكي","ميدوريا","أول مايت"],c:2,h:"لقبه ديكو."},
 {q:"من هو البطل رقم واحد في بداية بوكو نو هيرو؟",a:["إنديفور","أول مايت","هوكس","إيريزر"],c:1,h:"يقول: أنا هنا."},
-{q:"ما اسم بطل طوكيو غول؟",a:["كانِكي","أريما","هيدي","ياموري"],c:0,h:"شعره يتحول إلى الأبيض."},
+{q:"ما اسم بطل طوكيو غول؟",a:["كانيكي","أريما","هيدي","ياموري"],c:0,h:"شعره يتحول إلى الأبيض."},
 {q:"ما اسم منظمة الأكاتسوكي في ناروتو؟",a:["منظمة الأبطال","منظمة السحرة","منظمة الأكاتسوكي","منظمة الظلال"],c:2,h:"يرتدي أفرادها عباءات سوداء وسحباً حمراء."},
 {q:"من هو قائد الأكاتسوكي المعروف بباين؟",a:["ناغاتو","كونان","أوبيتو","مادارا"],c:0,h:"يتحكم بستة مسارات."},
-{q:"ما اسم أخت إدوارد في الخيميائي المعدني؟",a:["وينري","روزا","لاست","لا توجد أخت؛ أخوه ألفونس"],c:3,h:"ألفونس أخوه الأصغر."},
+{q:"ما اسم أخ إدوارد في الخيميائي المعدني؟",a:["وينري","ألفونس","روزا","روك بيل"],c:1,h:"أخوه الأصغر."},
 {q:"ما اسم بطل سباي x فاميلي؟",a:["لويد","يور","داميان","فرانكي"],c:0,h:"جاسوس يُعرف باسم توايلايت."},
 {q:"ما قدرة أنيا في سباي x فاميلي؟",a:["الاختفاء","قراءة الأفكار","الطيران","التحكم بالنار"],c:1,h:"تستطيع سماع أفكار الآخرين."},
 {q:"ما اسم بطل هايكيو؟",a:["كاغياما","تسوكيشيما","هيناتا","أويكاوا"],c:2,h:"لاعب كرة طائرة قصير القامة."},
@@ -126,7 +129,8 @@ const questions = [
 {q:"ما اسم الفتاة التي تساعد كونان؟",a:["ران","سونوكو","آي","كازوها"],c:0,h:"تعيش مع والدها كوغورو."}
 ];
 
-let player="",character="ناروتو",hearts=5,coins=0,level=0,usedHint=false,gameOver=false;
+let player="",character="ناروتو",hearts=5,coins=50,level=0;
+let shuffledQuestions=[],usedHint=false,gameOver=false;
 
 document.querySelectorAll(".character").forEach(el=>{
  el.onclick=()=>{
@@ -136,37 +140,60 @@ document.querySelectorAll(".character").forEach(el=>{
  };
 });
 
+function shuffleQuestions(){
+ shuffledQuestions=[...questions];
+ for(let i=shuffledQuestions.length-1;i>0;i--){
+  const j=Math.floor(Math.random()*(i+1));
+  [shuffledQuestions[i],shuffledQuestions[j]]=[shuffledQuestions[j],shuffledQuestions[i]];
+ }
+}
+
 function update(){
  document.getElementById("hearts").textContent=hearts;
  document.getElementById("coins").textContent=coins;
  document.getElementById("level").textContent=Math.min(level+1,50);
 }
 
-function startGame(){
- const name=document.getElementById("playerName").value.trim();
- if(!name){alert("اكتب اسم اللاعب أولاً!");return;}
- player=name;
- const saved=localStorage.getItem("animeMasterSave");
- if(saved && confirm("وجدنا حفظاً سابقاً. هل تريد متابعة اللعب؟")){
-  try{
-   const s=JSON.parse(saved);
-   if(s.player===player){
-    hearts=s.hearts;coins=s.coins;level=s.level;character=s.character;
-   }
-  }catch(e){}
- }
+function showGame(){
+ gameOver=false;
  document.getElementById("start").classList.add("hidden");
+ document.getElementById("end").classList.add("hidden");
  document.getElementById("game").classList.remove("hidden");
  document.getElementById("welcome").textContent="أهلاً "+player+" — شخصيتك "+character;
  update();
  showQuestion();
 }
 
+function startGame(){
+ const name=document.getElementById("playerName").value.trim();
+ if(!name){alert("اكتب اسم اللاعب أولاً!");return;}
+ if(!confirm("بدء مغامرة جديدة؟"))return;
+ player=name;
+ hearts=5;coins=50;level=0;
+ shuffleQuestions();
+ save();
+ showGame();
+}
+
+function continueGame(){
+ const saved=localStorage.getItem("animeMasterSave");
+ if(!saved){alert("لا يوجد حفظ سابق!");return;}
+ try{
+  const s=JSON.parse(saved);
+  if(!s.player || !Array.isArray(s.shuffledQuestions)){alert("الحفظ غير صالح.");return;}
+  player=s.player;character=s.character;
+  hearts=s.hearts;coins=s.coins;level=s.level;
+  shuffledQuestions=s.shuffledQuestions;
+  document.getElementById("playerName").value=player;
+  showGame();
+ }catch(e){alert("تعذر قراءة الحفظ.");}
+}
+
 function showQuestion(){
- if(level>=questions.length){finish(true);return;}
+ if(level>=shuffledQuestions.length){finish(true);return;}
  if(hearts<=0){finish(false);return;}
  usedHint=false;
- const q=questions[level];
+ const q=shuffledQuestions[level];
  document.getElementById("question").textContent="السؤال "+(level+1)+": "+q.q;
  document.getElementById("message").textContent="";
  const box=document.getElementById("answers");
@@ -183,36 +210,44 @@ function showQuestion(){
 
 function checkAnswer(index){
  if(gameOver)return;
- const q=questions[level];
+ const q=shuffledQuestions[level];
  const buttons=document.querySelectorAll(".answer");
  buttons.forEach(b=>b.disabled=true);
+
  if(index===q.c){
+  buttons[index].classList.add("correct");
   coins+=2;
   document.getElementById("message").textContent="إجابة صحيحة! +2 عملة 🪙";
  }else{
+  buttons[index].classList.add("wrong");
+  buttons[q.c].classList.add("correct");
   hearts=Math.max(0,hearts-1);
   document.getElementById("message").textContent="إجابة خاطئة! خسرت قلباً ❤️";
  }
+
  level++;
  save();
  update();
- if(hearts<=0 || level>=questions.length){
-  setTimeout(()=>finish(level>=questions.length),900);
+
+ if(hearts<=0 || level>=shuffledQuestions.length){
+  setTimeout(()=>finish(level>=shuffledQuestions.length),1200);
  }else{
-  setTimeout(showQuestion,1100);
+  setTimeout(showQuestion,1500);
  }
 }
 
 function hint(){
+ if(gameOver || level>=shuffledQuestions.length)return;
  if(usedHint){alert("لقد استخدمت التلميح لهذا السؤال!");return;}
  if(coins<10){alert("تحتاج إلى 10 عملات للتلميح!");return;}
  coins-=10;
  usedHint=true;
- document.getElementById("message").textContent="💡 تلميح: "+questions[level].h;
+ document.getElementById("message").textContent="💡 تلميح: "+shuffledQuestions[level].h;
  update();save();
 }
 
 function buyHeart(){
+ if(gameOver)return;
  if(hearts>=5){alert("لديك الحد الأقصى من القلوب! ❤️");return;}
  if(coins<15){alert("لا تملك 15 عملة لشراء قلب!");return;}
  coins-=15;
@@ -222,12 +257,16 @@ function buyHeart(){
 }
 
 function save(){
- localStorage.setItem("animeMasterSave",JSON.stringify({player,character,hearts,coins,level}));
+ localStorage.setItem("animeMasterSave",JSON.stringify({
+  player,character,hearts,coins,level,shuffledQuestions
+ }));
 }
 
 function saveAndExit(){
  save();
  alert("تم حفظ تقدمك على هذا الجهاز!");
+ document.getElementById("game").classList.add("hidden");
+ document.getElementById("start").classList.remove("hidden");
 }
 
 function finish(won){
@@ -242,7 +281,10 @@ function finish(won){
 function restartGame(){
  if(!confirm("هل تريد بدء مغامرة جديدة؟ سيُحذف تقدمك السابق."))return;
  localStorage.removeItem("animeMasterSave");
- location.reload();
+ hearts=5;coins=50;level=0;gameOver=false;
+ document.getElementById("end").classList.add("hidden");
+ document.getElementById("start").classList.remove("hidden");
+ document.getElementById("playerName").value=player;
 }
 </script>
 </body>
