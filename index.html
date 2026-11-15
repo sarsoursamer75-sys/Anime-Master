@@ -1,84 +1,105 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>أنمي ماستر</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#090612">
+<meta name="description" content="ANIME MASTER — لعبة تحديات وأسئلة أنمي باللغة العربية. اختر شخصيتك، اجتز المراحل، واجمع العملات!">
+<meta name="robots" content="index,follow">
+<meta property="og:title" content="ANIME MASTER — أنمي ماستر">
+<meta property="og:description" content="اختبر معرفتك بالأنمي، اختر شخصيتك، واجتز التحديات في أنمي ماستر.">
+<meta property="og:type" content="website">
+<title>ANIME MASTER — أنمي ماستر</title>
 <style>
-  *{box-sizing:border-box;font-family:sans-serif}
-  body{margin:0;background:#1a1638;color:#fff;min-height:100vh;display:flex;justify-content:center;align-items:center}
-  .box{width:92%;max-width:450px;background:#27224d;border-radius:20px;padding:22px;text-align:center;box-shadow:0 10px 30px rgba(0,0,0,.5)}
-  h1{margin:0 0 5px;color:#ffce00;font-size:26px}
-  .bar{display:flex;justify-content:space-between;background:#15122e;padding:10px 14px;border-radius:12px;margin:15px 0;font-weight:bold}
-  .tag{display:inline-block;background:#3d3573;color:#ffce00;padding:4px 12px;border-radius:12px;font-size:13px;margin-bottom:10px}
-  .q{background:#1f1b40;padding:18px;border-radius:14px;font-size:18px;font-weight:bold;min-height:95px;display:flex;align-items:center;justify-content:center;margin-bottom:15px;line-height:1.5}
-  .opts{display:grid;gap:10px}
-  button{background:#3a326e;color:#fff;border:none;padding:14px;border-radius:12px;font-size:16px;font-weight:bold;cursor:pointer}
-  button:active{background:#ffce00;color:#000}
-  .lock{display:none;padding:15px 0}
-  .timer{font-size:30px;font-weight:bold;color:#ff4757;margin:12px 0;direction:ltr}
+:root{--bg:#090612;--panel:#151022;--panel2:#201433;--purple:#9b5cff;--pink:#e35cff;--text:#f7f0ff;--muted:#b9a9ce;--gold:#ffd66b;--good:#62e6ad;--bad:#ff718b}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 50% -10%,#38205b 0,#120b20 42%,var(--bg) 78%);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",sans-serif;min-height:100vh}
+.wrap{max-width:900px;margin:auto;padding:22px 16px 50px}.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.brand{font-weight:1000;letter-spacing:2px;font-size:clamp(23px,5vw,36px);text-shadow:0 0 18px #a95cff}.brand span{color:var(--pink)}
+.stats{display:flex;gap:8px}.stat{background:#211632;border:1px solid #55347a;border-radius:13px;padding:8px 12px;font-weight:800}
+.hero{text-align:center;padding:36px 12px 24px}.eyebrow{color:#d5aaff;letter-spacing:3px;font-size:12px}.hero h1{font-size:clamp(34px,8vw,62px);margin:7px 0;text-shadow:0 0 25px #a24dff}.hero p{color:var(--muted);margin:0 auto;max-width:560px;line-height:1.8}
+.panel{background:linear-gradient(145deg,#1b122b,#100b1a);border:1px solid #57347b;border-radius:22px;padding:22px;box-shadow:0 12px 40px #0008;margin:16px 0}
+h2{margin:0 0 8px;font-size:22px}.sub{color:var(--muted);margin:0 0 18px;line-height:1.7}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(125px,1fr));gap:10px}
+.character{border:1px solid #4c3565;background:#21172e;color:var(--text);border-radius:16px;padding:14px 8px;cursor:pointer;transition:.15s;min-height:105px}
+.character:hover,.character.selected{border-color:var(--pink);box-shadow:0 0 18px #a34dff66;transform:translateY(-2px)}
+.avatar{font-size:32px;display:block;margin-bottom:5px}.anime{font-size:11px;color:#c9b5e4;display:block;margin-top:3px}
+button{font:inherit}.primary,.secondary{border:0;border-radius:14px;padding:13px 20px;font-weight:900;cursor:pointer}
+.primary{background:linear-gradient(100deg,#8a42ee,#d34eea);color:white;box-shadow:0 6px 20px #a54aff55}.primary:disabled{opacity:.4;cursor:not-allowed}
+.secondary{background:#2a1c3c;color:#eadcff;border:1px solid #64418a}
+.actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:18px}
+.hidden{display:none!important}.progress{height:9px;border-radius:20px;background:#332342;overflow:hidden;margin:12px 0 20px}.progress div{height:100%;width:1%;background:linear-gradient(90deg,#974aff,#ef60d6)}
+.question{font-size:clamp(21px,4vw,29px);line-height:1.55;margin:18px 0}
+.answers{display:grid;grid-template-columns:1fr 1fr;gap:10px}.answer{padding:15px;border:1px solid #5c4176;border-radius:14px;background:#21172f;color:white;cursor:pointer;font-weight:750}.answer:hover{border-color:#db68ff;background:#302044}.answer.correct{border-color:var(--good);background:#123b30}.answer.wrong{border-color:var(--bad);background:#421c2a}
+.note{color:var(--muted);line-height:1.8;margin-top:14px}.mentor{display:flex;align-items:center;gap:14px;background:#241633;border:1px solid #70479b;border-radius:16px;padding:14px;margin-top:18px}.eye{font-size:35px;filter:drop-shadow(0 0 9px #d05cff)}.mentor strong{color:#e7baff}.mentor p{margin:4px 0 0;color:#d6c6e7;line-height:1.6}
+footer{text-align:center;color:#796b8d;font-size:12px;margin-top:25px}
+@media(max-width:520px){.answers{grid-template-columns:1fr}.panel{padding:17px}.top{justify-content:center}}
 </style>
 </head>
 <body>
-<div class="box">
-  <h1>⚔️ أنمي ماستر ⚔️</h1>
-  <div class="bar">
-    <div id="h">❤️❤️❤️</div>
-    <div id="r">مبتدئ</div>
-    <div id="s">1 / 100</div>
+<div class="wrap">
+  <div class="top">
+    <div class="brand">ANIME <span>MASTER</span></div>
+    <div class="stats"><div class="stat">❤️ <b id="lives">5</b></div><div class="stat">🪙 <b id="coins">50</b></div><button class="secondary" id="settingsBtn" style="padding:8px 12px">⚙️ الإعدادات</button></div>
   </div>
-  <div id="play">
-    <div class="tag" id="an">...</div>
-    <div class="q" id="qt">...</div>
-    <div class="opts" id="op"></div>
-  </div>
-  <div class="lock" id="lk">
-    <div style="font-size:45px">💔</div>
-    <h3>انتهت قلوبك الـ 3 لهذا اليوم!</h3>
-    <p style="font-size:14px;color:#ccc">لقد أخطأت 3 مرات. عد غداً لتكملة التحدي.</p>
-    <div class="timer" id="tm">24:00:00</div>
-  </div>
-</div>
-<script>
-const Q=[
-{a:"ون بيس",q:"🏴‍☠️👒🍖 من صاحب هذه الرموز؟",o:["لوفي","زورو","شانكس","إيس"],c:0},
-{a:"ناروتو",q:"ما اسم الوحش المختوم داخل ناروتو؟",o:["شوكاكو","كوراما","غيوكي","سون غوكو"],c:1},
-{a:"هجوم العمالقة",q:"ما اسم الفيلق صاحب شعار أجنحة الحرية؟",o:["الشرطة","الحامية","فيلق الاستطلاع","التدريب"],c:2},
-{a:"ديث نوت",q:"📓🍎✍️ ما اسم الشينيغامي مرافق لايت؟",o:["ريم","ريوك","جيلوس","سيدو"],c:1},
-{a:"دراغون بول",q:"كم عدد كرات التنين لاستدعاء شينرون؟",o:["5","6","7","9"],c:2},
-{a:"قاتل الشياطين",q:"ما أسلوب التنفس الأول لتانجيرو؟",o:["اللهب","الرعد","الماء","الوحش"],c:2},
-{a:"جوجوتسو كايسن",q:"من هو أقوى ساحر جوجوتسو حديث؟",o:["غوجو ساتورو","إيتادوري","ميغومي","نانامي"],c:0},
-{a:"هنتر x هنتر",q:"ما هو نوع النين الخاص بغون؟",o:["التحويل","التعزيز","التجسيد","التلاعب"],c:1},
-{a:"سولو ليفلينج",q:"ما لقب سونغ جين وو سابقاً؟",o:["ملك الظلال","أضعف صياد في البشرية","الخفي","سيد الزنزانات"],c:1},
-{a:"بليتش",q:"ما اسم سيف إيتشيغو كوروساكي؟",o:["زانغيتسو","سينبونزاكورا","هيورينمارو","بينيهيمي"],c:0},
-{a:"أكاديمية بطلي",q:"ما اسم القدرة التي ورثها ميدوريا؟",o:["الجميع للواحد","الواحد للجميع","الانفجار","الجليد والنار"],c:1},
-{a:"الخيميائي الفولاذي",q:"ما القانون الأساسي للخيمياء؟",o:["التبادل المتكافئ","الخلق من العدم","الطاقة المطلقة","التحول"],c:0}
-];
-let st=JSON.parse(localStorage.getItem("am_v2"))||{s:1,h:3,l:null,list:Array.from({length:100},()=>Q[Math.floor(Math.random()*Q.length)])};
-function sv(){localStorage.setItem("am_v2",JSON.stringify(st))}
-function ui(){
-  if(st.l&&Date.now()>=st.l){st.h=3;st.l=null;sv()}
-  document.getElementById("h").innerText="❤️".repeat(st.h)+"🖤".repeat(3-st.h);
-  document.getElementById("s").innerText=st.s+" / 100";
-  document.getElementById("r").innerText=st.s<=25?"مبتدئ":st.s<=50?"مغامر":st.s<=75?"نخبة":"ماستر";
-  if(st.h<=0){document.getElementById("play").style.display="none";document.getElementById("lk").style.display="block";return}
-  document.getElementById("play").style.display="block";document.getElementById("lk").style.display="none";
-  if(st.s>100){document.getElementById("an").innerText="مبروك!";document.getElementById("qt").innerText="أصبحت أنمي ماستر 🏆";document.getElementById("op").innerHTML='<button onclick="localStorage.removeItem(\'am_v2\');location.reload()">إعادة اللعب</button>';return}
-  let cur=st.list[st.s-1];
-  document.getElementById("an").innerText="أنمي: "+cur.a;
-  document.getElementById("qt").innerText=cur.q;
-  document.getElementById("op").innerHTML=cur.o.map((x,i)=>`<button onclick="ans(${i})">${x}</button>`).join("");
-}
-function ans(i){
-  if(i===st.list[st.s-1].c){st.s++}else{st.h--;if(st.h<=0)st.l=Date.now()+86400000}
-  sv();ui();
-}
-setInterval(()=>{
-  if(!st.l)return;let d=st.l-Date.now();if(d<=0){ui();return}
-  let h=String(Math.floor(d/3600000)).padStart(2,"0"),m=String(Math.floor(d/60000%60)).padStart(2,"0"),s=String(Math.floor(d/1000%60)).padStart(2,"0");
-  document.getElementById("tm").innerText=h+":"+m+":"+s;
-},1000);
-ui();
-</script>
-</body>
+  <section id="settingsPanel" class="panel hidden">
+    <h2>⚙️ إعدادات اللاعب</h2>
+    <p class="sub">غيّر اسمك متى ما أردت، وسيظهر الاسم الجديد داخل اللعبة.</p>
+    <label for="settingsName" style="display:block;margin-bottom:8px;color:#d5b9f1;font-weight:800">اسم اللاعب</label>
+    <input id="settingsName" maxlength="18" placeholder="اكتب اسمك هنا..." autocomplete="nickname" style="width:100%;padding:14px;border-radius:13px;border:1px solid #64418a;background:#100b1a;color:#fff;font:inherit;outline:none">
+    <div class="actions"><button class="primary" id="saveSettings">حفظ الاسم</button><button class="secondary" id="closeSettings">إغلاق</button></div>
+    <p id="settingsMessage" class="note" aria-live="polite"></p>
+  </section>
+  <header class="hero">
+    <div class="eyebrow">THE MYSTERY BEGINS</div>
+    <h1>أنمي ماستر</h1>
+    <p>اختبر ذكاءك، اكتشف الأسرار، وتقدّم عبر عوالم الأنمي. هل أنت مستعد للتحدّي؟</p>
+  </header>
+  <section id="choose" class="panel">
+    <h2>اكتب اسمك واختر شخصيتك</h2>
+    <p class="sub">سيظهر اسمك تلقائياً من حساب Google بجانب شخصيتك.</p>
+    <div id="googleAuthBox" style="text-align:center;margin:12px 0 18px">
+      <button class="primary" id="googleSignIn" type="button">تسجيل الدخول باستخدام Google</button>
+      <div id="googleProfile" class="hidden" style="margin-top:12px;align-items:center;justify-content:center;gap:10px">
+        <img id="googlePhoto" alt="صورة حساب Google" referrerpolicy="no-referrer" style="width:46px;height:46px;border-radius:50%;object-fit:cover;border:2px solid #b76cff">
+        <span id="googleDisplayName" style="font-weight:800"></span>
+        <button class="secondary" id="googleSignOut" type="button" style="padding:7px 10px">تسجيل الخروج</button>
+      </div>
+      <p id="googleAuthMessage" class="note" aria-live="polite">سجّل الدخول أولاً حتى نستخدم اسمك وصورتك من Google.</p>
+    </div>
+    <label for="playerName" style="display:block;margin:0 0 8px;color:#d5b9f1;font-weight:800">اسم اللاعب</label>
+    <input id="playerName" maxlength="18" placeholder="سيظهر اسمك بعد تسجيل الدخول بـ Google" autocomplete="nickname" readonly style="width:100%;padding:14px;border-radius:13px;border:1px solid #64418a;background:#100b1a;color:#fff;font:inherit;margin-bottom:18px;outline:none">
+    <p class="sub">اختَر بطلك قبل دخول التحدّي. يمكنك تغيير اختيارك لاحقاً.</p>
+    <div class="grid" id="characters">
+      <button class="character" data-name="ناروتو" data-emoji="🍥"><span class="avatar">🍥</span><b>ناروتو</b><span class="anime">Naruto</span></button>
+      <button class="character" data-name="نامي" data-emoji="🧭"><span class="avatar">🧭</span><b>نامي</b><span class="anime">One Piece</span></button>
+      <button class="character" data-name="ميكاسا" data-emoji="⚔️"><span class="avatar">⚔️</span><b>ميكاسا</b><span class="anime">Attack on Titan</span></button>
+      <button class="character" data-name="لايت" data-emoji="📓"><span class="avatar">📓</span><b>لايت</b><span class="anime">Death Note</span></button>
+      <button class="character" data-name="نيزوكو" data-emoji="🎋"><span class="avatar">🎋</span><b>نيزوكو</b><span class="anime">Demon Slayer</span></button>
+      <button class="character" data-name="غوكو" data-emoji="🐉"><span class="avatar">🐉</span><b>غوكو</b><span class="anime">Dragon Ball</span></button>
+      <button class="character" data-name="نوبارا" data-emoji="🔨"><span class="avatar">🔨</span><b>نوبارا</b><span class="anime">Jujutsu Kaisen</span></button>
+      <button class="character" data-name="توكا" data-emoji="🌙"><span class="avatar">🌙</span><b>توكا</b><span class="anime">Tokyo Ghoul</span></button>
+      <button class="character" data-name="غون" data-emoji="🎣"><span class="avatar">🎣</span><b>غون</b><span class="anime">Hunter x Hunter</span></button>
+      <button class="character" data-name="جين وو" data-emoji="🗡️"><span class="avatar">🗡️</span><b>جين وو</b><span class="anime">Solo Leveling</span></button>
+      <button class="character" data-name="روكيا" data-emoji="❄️"><span class="avatar">❄️</span><b>روكيا</b><span class="anime">Bleach</span></button>
+      <button class="character" data-name="سايتاما" data-emoji="👊"><span class="avatar">👊</span><b>سايتاما</b><span class="anime">One Punch Man</span></button>
+    </div>
+    <div class="actions"><button class="primary" id="begin" disabled>ابدأ المغامرة</button></div>
+  </section>
+  <section id="game" class="panel hidden">
+    <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap"><b>المرحلة 1 من 100</b><span id="playerTag">شخصيتك: —</span></div>
+    <div class="progress"><div></div></div>
+    <div class="eyebrow" id="stageEyebrow">اختبار المعرفة • المرحلة 1</div>
+    <div class="question" id="questionText"></div>
+    <div class="answers" id="answers"></div>
+    <p id="feedback" class="note" aria-live="polite">اختر إجابة واحدة. لكل إجابة صحيحة مكافأة من العملات!</p>
+    <div class="actions"><button class="secondary" id="hint">💡 تلميح (10 عملات)</button><button class="secondary" id="back">تغيير الشخصية</button></div>
+  </section>
+  <section id="done" class="panel hidden" style="text-align:center">
+    <div style="font-size:48px">🏆</div><h2>أحسنت! أنهيت أول تحدٍ</h2>
+    <p class="sub">هذه بداية رحلتك في أنمي ماستر. المرحلة التالية ستكون ضمن التحديث القادم من النموذج التجريبي.</p>
+    <div class="actions"><button class="primary" id="again">العودة للبداية</button></div>
+  </section>
+  <div class="mentor" id="mentor"><div class="eye">👁️</div><div><strong>المرشد المجهول</strong><p>أهلاً بك، أيها اللاعب... أمامك 100 مرحلة، لكن لا تثق بكل ما تراه. أول سرّ يبدأ الآن.</p></div></div>
+  <footer>ANIME MASTER • THE MYSTERY BEGINS</footer>
+ </div></body>
 </html>
