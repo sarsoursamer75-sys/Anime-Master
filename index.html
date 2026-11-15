@@ -334,3 +334,38 @@ const firebaseConfig = {
   appId: "1:387357465791:web:2fff67caca4f23b57e3a0a",
   measurementId: "G-EVGQL3P38T"
 };
+
+
+function shuffleQuestions(){
+ const groups = {};
+
+ questions.forEach(q => {
+  if(!groups[q.anime]) groups[q.anime] = [];
+  groups[q.anime].push(q);
+ });
+
+ Object.values(groups).forEach(group => {
+  group.sort(() => Math.random() - 0.5);
+ });
+
+ shuffledQuestions = [];
+
+ let lastAnime = "";
+
+ while(Object.values(groups).some(group => group.length > 0)){
+  let available = Object.keys(groups).filter(
+   anime => groups[anime].length > 0 && anime !== lastAnime
+  );
+
+  if(available.length === 0){
+   available = Object.keys(groups).filter(
+    anime => groups[anime].length > 0
+   );
+  }
+
+  const chosen = available[Math.floor(Math.random()*available.length)];
+  shuffledQuestions.push(groups[chosen].pop());
+  lastAnime = chosen;
+ }
+}
+<button onclick="openAnimeSettings()">⚙️ الإعدادات</button>
