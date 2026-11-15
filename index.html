@@ -289,3 +289,48 @@ function restartGame(){
 </script>
 </body>
 </html>
+
+
+function shuffleQuestions(){
+ const groups = {};
+
+ questions.forEach(q => {
+  if(!groups[q.anime]) groups[q.anime] = [];
+  groups[q.anime].push(q);
+ });
+
+ Object.values(groups).forEach(group => {
+  group.sort(() => Math.random() - 0.5);
+ });
+
+ shuffledQuestions = [];
+
+ let lastAnime = "";
+
+ while(Object.values(groups).some(group => group.length > 0)){
+  let available = Object.keys(groups).filter(
+   anime => groups[anime].length > 0 && anime !== lastAnime
+  );
+
+  if(available.length === 0){
+   available = Object.keys(groups).filter(
+    anime => groups[anime].length > 0
+   );
+  }
+
+  const chosen = available[Math.floor(Math.random()*available.length)];
+  shuffledQuestions.push(groups[chosen].pop());
+  lastAnime = chosen;
+ }
+}
+{anime:"ناروتو",q:"ما اسم بطل أنمي ناروتو؟",a:["ساسكي","ناروتو","كاكاشي","إيتاتشي"],c:1,h:"يحلم بأن يصبح الهوكاغي."},
+{anime:"ون بيس",q:"ما اسم بطل ون بيس؟",a:["زورو","سانجي","لوفي","أوسوب"],c:2,h:"يحلم بأن يصبح ملك القراصنة."},// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyB4UdbzNrl8XG1Hqxpq0rKCKr5xJihJxO4",
+  authDomain: "anime-master-d3e74.firebaseapp.com",
+  projectId: "anime-master-d3e74",
+  storageBucket: "anime-master-d3e74.firebasestorage.app",
+  messagingSenderId: "387357465791",
+  appId: "1:387357465791:web:2fff67caca4f23b57e3a0a",
+  measurementId: "G-EVGQL3P38T"
+};
