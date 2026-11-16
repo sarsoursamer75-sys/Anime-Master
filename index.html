@@ -531,3 +531,27 @@ document.getElementById("animeMusic").checked =
 document.getElementById("animeSong").value =
   localStorage.getItem("animeSong") || "random";
 </script>
+
+
+/* إصلاح المسافة البيضاء في واجهة Anime Master */
+body {
+    margin: 0;
+    padding: 0;
+}
+
+.settings,
+#settings {
+    margin-bottom: 0 !important;
+    padding-bottom: 0 !important;
+}
+
+.start-screen,
+#start-screen,
+.home-screen {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+}
+
+.container {
+    gap: 0;
+}
