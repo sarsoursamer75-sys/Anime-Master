@@ -1,358 +1,421 @@
-from pathlib import Path
 
-html = r'''<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Anime Master</title>
 <style>
-:root{--bg1:#100b24;--bg2:#25104b;--panel:#21183a;--card:#352650;--accent:#9b59e8;--text:#fff;--muted:#c9b8df;--gold:#ffd36a}
 *{box-sizing:border-box}
-body{margin:0;min-height:100vh;padding:16px;background:linear-gradient(145deg,var(--bg1),var(--bg2),#090817);color:var(--text);font-family:Arial,sans-serif;text-align:center}
-body.light{--bg1:#f3eaff;--bg2:#dfd0fa;--panel:#fff;--card:#eadcfb;--text:#241536;--muted:#665477}
-h1{color:#d8a5ff;font-size:clamp(27px,7vw,36px);text-shadow:0 0 18px #a34cff}
-body.light h1{color:#7132a8}
-.panel{max-width:620px;margin:14px auto;padding:18px;background:var(--panel);color:var(--text);border:1px solid #7042a5;border-radius:18px;box-shadow:0 8px 25px #0005}
-button,input,select{font:inherit}
-button{border:0;border-radius:12px;padding:11px 16px;margin:5px;background:var(--accent);color:white;font-weight:bold;cursor:pointer}
-button:disabled{opacity:.55;cursor:not-allowed}
-button.secondary{background:#51436a}
-input,select{max-width:100%;padding:12px;border:0;border-radius:10px;margin:7px;text-align:center}
-input[type=checkbox]{width:auto}
-.stats{display:flex;justify-content:space-around;gap:8px;flex-wrap:wrap;font-size:18px}
-.character-choice{display:inline-block;padding:10px;margin:4px;background:var(--card);border:2px solid transparent;border-radius:12px;cursor:pointer}
-.character-choice.selected{border-color:#d69cff}
+body{margin:0;padding:12px;background:#171329;color:white;font-family:Tahoma,Arial;text-align:center}
+h1{color:#ffd45c}
+button{border:0;border-radius:12px;padding:12px 16px;margin:5px;background:#8053d6;color:white;font-weight:bold;font-size:15px;cursor:pointer}
+button:disabled{opacity:.5}
+input,select{padding:12px;border-radius:10px;border:1px solid #8069a9;background:#211a37;color:white;margin:5px;max-width:100%}
+.panel{max-width:700px;margin:15px auto;padding:17px;background:#282044;border:1px solid #59467e;border-radius:18px}
 .hidden{display:none!important}
-#question{font-size:21px;line-height:1.6}
-.answer{display:block;width:100%;background:var(--card);color:var(--text);text-align:right}
-.answer.correct{background:#159447!important;color:white}
-.answer.wrong{background:#c62828!important;color:white}
-#message{min-height:28px;color:var(--gold)}
-.small{color:var(--muted);font-size:13px}
-.shop-grid,.pet-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(135px,1fr));gap:10px}
-.shop-card,.pet-card{padding:12px;border-radius:14px;background:var(--card)}
-.pet{font-size:48px;display:inline-block;animation:bob 1.8s ease-in-out infinite}
-.pet:nth-child(2n){animation-delay:.35s}
-@keyframes bob{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-9px) rotate(3deg)}}
-.pet-face{font-size:42px;display:block}
-.nav{display:flex;flex-wrap:wrap;justify-content:center;gap:4px}
-hr{border:0;border-top:1px solid #76549b;margin:16px 0}
-.setting-row{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--card);padding:12px;border-radius:12px;margin:8px 0;text-align:right}
-#profilePets:empty:after{content:"لم تشترِ أي رفيق بعد. زر المتجر لشراء أول رفيق!";color:var(--muted)}
+.nav{display:flex;flex-wrap:wrap;justify-content:center}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:12px 0}
+.stats div{background:#40335f;padding:10px;border-radius:10px}
+.character-list{display:flex;flex-wrap:wrap;justify-content:center;gap:7px}
+.character-choice{padding:10px;background:#40335f;border:2px solid transparent;border-radius:10px;cursor:pointer}
+.character-choice.selected{border-color:#ffd45c}
+.answers{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.answer{background:#514071;min-height:50px}
+.correct{background:#159447!important}
+.wrong{background:#bd2d49!important}
+.small{font-size:13px;color:#c9bddf}
+#message{min-height:25px;color:#ffd45c}
+.shop-grid,.pet-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:10px}
+.shop-card,.pet-card{background:#40335f;border-radius:13px;padding:10px}
+.pet-card{min-height:245px;display:flex;flex-direction:column;justify-content:flex-end;align-items:center}
+.setting-row{display:flex;justify-content:space-between;align-items:center;background:#40335f;padding:12px;border-radius:10px;margin:8px 0}
+.profile-hero{background:#211a37;border:1px solid #8069a9;border-radius:16px;max-width:300px;margin:12px auto;padding:12px}
+hr{border:0;border-top:1px solid #76549b;margin:17px 0}
+.shop-entry{display:block;width:100%;max-width:400px;margin:12px auto;background:#a044bd;font-size:18px}
+
+/* شخصية أنمي كاملة */
+.avatar{--hair:#f3a21b;--shirt:#2876c9;--accent:#f5d34e;position:relative;width:126px;height:194px;margin:5px auto;animation:breathe 2.5s infinite;transform-origin:bottom;filter:drop-shadow(0 5px 5px #0005)}
+.hair{position:absolute;z-index:5;top:4px;left:36px;width:55px;height:45px;background:var(--hair);clip-path:polygon(0 30%,12% 0,28% 15%,44% 0,58% 16%,82% 0,100% 30%,88% 82%,72% 65%,60% 100%,44% 70%,24% 100%,15% 67%,0 85%)}
+.face{position:absolute;z-index:4;top:20px;left:43px;width:42px;height:45px;background:#f2c6a2;border:2px solid #6c4250;border-radius:42% 42% 48% 48%}
+.face:before{content:"";position:absolute;left:8px;top:17px;width:5px;height:8px;background:#30243a;border-radius:50%;box-shadow:18px 0 #30243a}
+.face:after{content:"";position:absolute;left:15px;top:30px;width:9px;height:3px;border-bottom:2px solid #9c5360;border-radius:50%}
+.neck{position:absolute;top:59px;left:58px;width:13px;height:13px;background:#e6ae8e}
+.torso{position:absolute;z-index:3;top:68px;left:34px;width:60px;height:60px;background:var(--shirt);border:2px solid #24213c;border-radius:15px;clip-path:polygon(16% 0,84% 0,100% 100%,0 100%)}
+.torso:after{content:"";position:absolute;left:27px;width:5px;height:58px;background:var(--accent)}
+.arm{position:absolute;z-index:2;top:73px;width:17px;height:55px;background:var(--shirt);border:2px solid #24213c;border-radius:12px;transform-origin:top}
+.arm.left{left:25px;animation:armL 2.2s infinite}
+.arm.right{right:23px;animation:armR 2.2s infinite}
+.hand{position:absolute;bottom:-7px;left:1px;width:13px;height:14px;background:#f2c6a2;border-radius:50%}
+.belt{position:absolute;z-index:4;top:122px;left:38px;width:52px;height:7px;background:var(--accent);border-radius:4px}
+.leg{position:absolute;z-index:2;top:126px;width:21px;height:52px;background:#29304e;border:2px solid #17172c;border-radius:5px 5px 8px 8px;transform-origin:top}
+.leg.left{left:41px;animation:legL 2.4s infinite}
+.leg.right{right:39px;animation:legR 2.4s infinite}
+.boot{position:absolute;bottom:-4px;left:-3px;width:27px;height:11px;background:#252238;border-radius:5px}
+.scarf{position:absolute;z-index:2;top:70px;left:82px;width:35px;height:14px;background:var(--accent);border-radius:0 12px 12px 0;animation:scarf 1.8s infinite}
+.shadow{position:absolute;bottom:2px;left:30px;width:68px;height:9px;background:#08081488;border-radius:50%;filter:blur(3px)}
+@keyframes breathe{50%{transform:translateY(-4px)}}
+@keyframes armL{50%{transform:rotate(12deg)}}
+@keyframes armR{50%{transform:rotate(-12deg)}}
+@keyframes legL{50%{transform:rotate(3deg)}}
+@keyframes legR{50%{transform:rotate(-3deg)}}
+@keyframes scarf{50%{transform:rotate(15deg) scaleX(1.1)}}
+@media(max-width:420px){.answers{grid-template-columns:1fr}.panel{padding:12px}}
 </style>
 </head>
 <body>
+
 <h1>⚔️ ANIME MASTER ⚔️</h1>
 <p>هل أنت مستعد لتصبح ملك الأنمي؟</p>
 
 <div class="nav">
-  <button onclick="showSection('start')">الرئيسية</button>
-  <button onclick="showSection('profile')">👤 الملف الشخصي</button>
-  <button onclick="showSection('shop')">🛒 المتجر</button>
-  <button onclick="showSection('settings')">⚙️ الإعدادات</button>
+<button onclick="show('start')">الرئيسية</button>
+<button onclick="show('profile')">👤 الملف الشخصي</button>
+<button onclick="show('shop')">🛒 المتجر</button>
+<button onclick="show('settings')">⚙️ الإعدادات</button>
 </div>
 
 <section class="panel" id="start">
-  <h2>ابدأ مغامرتك</h2>
-  <input id="playerName" placeholder="اكتب اسم اللاعب" maxlength="24">
-  <h3>اختر شخصيتك الأساسية</h3>
-  <div id="characters">
-    <span class="character-choice selected" data-name="ناروتو" onclick="chooseCharacter(this)">🍥 ناروتو</span>
-    <span class="character-choice" data-name="غوكو" onclick="chooseCharacter(this)">🐉 غوكو</span>
-    <span class="character-choice" data-name="نيزوكو" onclick="chooseCharacter(this)">🎋 نيزوكو</span>
-    <span class="character-choice" data-name="ميكاسا" onclick="chooseCharacter(this)">⚔️ ميكاسا</span>
-    <span class="character-choice" data-name="لايت" onclick="chooseCharacter(this)">📓 لايت</span>
-    <span class="character-choice" data-name="نامي" onclick="chooseCharacter(this)">🍊 نامي</span>
-    <span class="character-choice" data-name="غون" onclick="chooseCharacter(this)">🎣 غون</span>
-    <span class="character-choice" data-name="سايتاما" onclick="chooseCharacter(this)">👊 سايتاما</span>
-    <span class="character-choice" data-name="روكيا" onclick="chooseCharacter(this)">❄️ روكيا</span>
-    <span class="character-choice" data-name="جين وو" onclick="chooseCharacter(this)">🖤 جين وو</span>
-    <span class="character-choice" data-name="نوبارا" onclick="chooseCharacter(this)">🔨 نوبارا</span>
-    <span class="character-choice" data-name="توكا" onclick="chooseCharacter(this)">🪽 توكا</span>
-  </div>
-  <button onclick="startGame()">ابدأ اللعب 🚀</button>
-  <button class="secondary" onclick="continueGame()">متابعة الحفظ 💾</button>
-  <p class="small">تبدأ المغامرة بـ 5 قلوب و50 عملة.</p>
+<h2>ابدأ مغامرتك</h2>
+<input id="playerName" placeholder="اكتب اسمك">
+<h3>اختر شخصيتك</h3>
+<div class="character-list" id="characters">
+<span class="character-choice selected" data-name="ناروتو" onclick="choose(this)">🍥 ناروتو</span>
+<span class="character-choice" data-name="غوكو" onclick="choose(this)">🐉 غوكو</span>
+<span class="character-choice" data-name="نيزوكو" onclick="choose(this)">🎋 نيزوكو</span>
+<span class="character-choice" data-name="ميكاسا" onclick="choose(this)">⚔️ ميكاسا</span>
+<span class="character-choice" data-name="لايت" onclick="choose(this)">📓 لايت</span>
+<span class="character-choice" data-name="نامي" onclick="choose(this)">🍊 نامي</span>
+<span class="character-choice" data-name="غون" onclick="choose(this)">🎣 غون</span>
+<span class="character-choice" data-name="سايتاما" onclick="choose(this)">👊 سايتاما</span>
+<span class="character-choice" data-name="روكيا" onclick="choose(this)">❄️ روكيا</span>
+<span class="character-choice" data-name="جين وو" onclick="choose(this)">🖤 جين وو</span>
+</div>
+<button onclick="startGame()">ابدأ اللعب 🚀</button>
+<button onclick="continueGame()">متابعة الحفظ 💾</button>
+<button class="shop-entry" onclick="show('shop')">🛒 افتح المتجر</button>
+<p class="small">تبدأ بخمسة قلوب و50 عملة.</p>
 </section>
 
 <section class="panel hidden" id="game">
-  <h2 id="welcome"></h2>
-  <div class="stats">
-    <div>❤️ <span id="hearts">5</span></div>
-    <div>🪙 <span id="coins">50</span></div>
-    <div>🏆 المرحلة <span id="level">1</span>/50</div>
-  </div>
-  <hr>
-  <h2 id="question"></h2>
-  <div id="answers"></div>
-  <p id="message"></p>
-  <button onclick="hint()">💡 تلميح (10 عملات)</button>
-  <button onclick="buyHeart()">❤️ شراء قلب (15 عملة)</button>
-  <button class="secondary" onclick="saveAndExit()">💾 حفظ وخروج</button>
-  <p class="small">الإجابة الصحيحة تمنحك عملتين. الحد الأقصى للقلوب 5.</p>
+<div class="stats">
+<div>❤️ <span id="hearts">5</span></div>
+<div>🪙 <span id="coins">50</span></div>
+<div>🏆 <span id="level">1</span></div>
+</div>
+<div class="question" id="question"></div>
+<div class="answers" id="answers"></div>
+<p id="message"></p>
+<button onclick="hint()">💡 تلميح (5 عملات)</button>
+<button onclick="buyHeart()">❤️ شراء قلب (15 عملة)</button>
+<button onclick="show('profile')">الملف الشخصي</button>
+<button onclick="show('shop')">المتجر</button>
+<div class="setting-row">
+<span>🎵 الموسيقى</span>
+<button id="musicButton" onclick="toggleMusic()">تشغيل / إيقاف</button>
+</div>
+<audio id="music" loop></audio>
 </section>
 
 <section class="panel hidden" id="end">
-  <h2 id="endTitle"></h2><p id="endText"></p>
-  <button onclick="restartGame()">العب من جديد 🔄</button>
-  <button class="secondary" onclick="showSection('profile')">الملف الشخصي</button>
+<h2 id="endTitle"></h2>
+<p id="endText"></p>
+<button onclick="restart()">ابدأ من جديد</button>
+<button onclick="show('profile')">الملف الشخصي</button>
 </section>
 
 <section class="panel hidden" id="profile">
-  <h2>👤 الملف الشخصي</h2>
-  <p id="profileName">اللاعب</p>
-  <div class="stats">
-    <div>⭐ الشخصية: <span id="profileCharacter">ناروتو</span></div>
-    <div>🪙 العملات: <span id="profileCoins">50</span></div>
-    <div>🏆 المرحلة: <span id="profileLevel">1</span></div>
-  </div>
-  <hr><h3>رفاقك اللطيفون 🥰</h3>
-  <div class="pet-grid" id="profilePets"></div>
-  <p class="small">الرفاق الذين تشتريهم يظهرون هنا ويتحركون تلقائيًا.</p>
-  <button onclick="showSection('shop')">اذهب إلى المتجر 🛒</button>
+<h2>👤 الملف الشخصي</h2>
+<p id="profileName">اللاعب</p>
+<div class="profile-hero">
+<div id="mainAvatar"></div>
+<h3>شخصيتك الرئيسية</h3>
+</div>
+<div class="stats">
+<div>⭐ <span id="profileCharacter"></span></div>
+<div>🪙 <span id="profileCoins"></span></div>
+<div>🏆 <span id="profileLevel"></span></div>
+</div>
+<hr>
+<h3>رفاقك من عالم الأنمي</h3>
+<div class="pet-grid" id="profilePets"></div>
+<button onclick="show('shop')">اذهب إلى المتجر 🛒</button>
 </section>
 
 <section class="panel hidden" id="shop">
-  <h2>🛒 متجر كائنات الأنمي</h2>
-  <p>كل رفيق بسعر 50 عملة.</p>
-  <p>رصيدك: 🪙 <span id="shopCoins">50</span></p>
-  <div class="shop-grid" id="shopItems"></div>
+<h2>🛒 متجر شخصيات الأنمي</h2>
+<p>سعر كل شخصية 50 عملة.</p>
+<p>رصيدك: <span id="shopCoins">50</span> 🪙</p>
+<div class="shop-grid" id="shopItems"></div>
+<button onclick="show('start')">العودة للرئيسية</button>
 </section>
 
 <section class="panel hidden" id="settings">
-  <h2>⚙️ إعدادات Anime Master</h2>
-  <div class="setting-row"><label for="soundToggle">🔊 الأصوات</label><input type="checkbox" id="soundToggle" checked onchange="saveSettings()"></div>
-  <div class="setting-row"><label for="themeSelect">🌙 المظهر</label>
-    <select id="themeSelect" onchange="setTheme(this.value)"><option value="dark">داكن</option><option value="light">فاتح</option></select>
-  </div>
-  <div class="setting-row"><label for="languageSelect">🌐 اللغة</label>
-    <select id="languageSelect" onchange="saveSettings()"><option value="ar">العربية</option><option value="en">English (اختيار محفوظ فقط)</option></select>
-  </div>
-  <button class="secondary" onclick="showSection('start')">⬅️ العودة</button>
-  <p class="small">تم إلغاء الموسيقى بناءً على اختيارك السابق.</p>
+<h2>⚙️ الإعدادات</h2>
+<div class="setting-row">
+<label>🎵 الموسيقى</label>
+<input type="checkbox" id="soundToggle" checked onchange="saveSettings()">
+</div>
+<div class="setting-row">
+<label>🌙 المظهر</label>
+<select id="themeSelect" onchange="setTheme(this.value)">
+<option value="dark">داكن</option>
+<option value="light">فاتح</option>
+</select>
+</div>
+<p class="small">الأغنية تتغير كل خمس مراحل. ضع ملفات الموسيقى بجانب index.html.</p>
+<button onclick="show('start')">العودة</button>
 </section>
 
 <script>
-const questions = [
-{q:"ما اسم بطل أنمي ناروتو؟",a:["ساسكي","ناروتو","كاكاشي","إيتاتشي"],c:1,h:"يحلم بأن يصبح الهوكاغي."},
-{q:"ما اسم قرية ناروتو؟",a:["قرية الرمل","قرية المطر","قرية الورق","قرية الضباب"],c:2,h:"اسمها كونوها."},
-{q:"من هو أخو ساسكي؟",a:["إيتاتشي","مادارا","أوبيتو","ناروتو"],c:0,h:"من عشيرة الأوتشيها."},
-{q:"ما اسم والد ناروتو؟",a:["هيروزن","ميناتو","جيرايا","كاكاشي"],c:1,h:"الهوكاغي الرابع."},
-{q:"ما الوحش المختوم داخل ناروتو؟",a:["التنين","الثعلب ذو التسعة ذيول","النمر","الذئب"],c:1,h:"كوراما."},
-{q:"ما اسم بطل ون بيس؟",a:["زورو","سانجي","لوفي","أوسوب"],c:2,h:"يحلم بأن يصبح ملك القراصنة."},
-{q:"ما اسم سيف زورو؟",a:["إنما","إكسكاليبر","دوراندال","زابيمارو"],c:0,h:"أحد سيوفه الشهيرة."},
-{q:"ما حلم لوفي؟",a:["أن يصبح هوكاغي","ملك القراصنة","أفضل سياف","أمير البحار"],c:1,h:"يريد الوصول إلى ون بيس."},
-{q:"ما اسم طباخ طاقم قبعة القش؟",a:["فرانكي","بروك","سانجي","جينبي"],c:2,h:"يقاتل غالباً برجليه."},
-{q:"ما اسم ملاح طاقم لوفي؟",a:["نامي","روبين","هانكوك","فيفي"],c:0,h:"تحب المال والبرتقال."},
-{q:"ما اسم بطل دراغون بول؟",a:["فيجيتا","غوهان","غوكو","بيكولو"],c:2,h:"سايان يحب القتال."},
-{q:"ما التحول الأشهر لغوكو؟",a:["النينجا","السوبر سايان","العملاق","الهوكاغي"],c:1,h:"شعره يصبح ذهبياً."},
-{q:"من هو أمير السايان؟",a:["غوكو","ترانكس","فيجيتا","غوهان"],c:2,h:"زوج بولما."},
-{q:"ما اسم ابن غوكو الأكبر؟",a:["غوتين","غوهان","ترانكس","باردوك"],c:1,h:"درس عند بيكولو."},
-{q:"من هو العدو الذي امتص أندرويد 17 و18؟",a:["فريزا","سيل","بو","بيروس"],c:1,h:"وصل إلى الشكل الكامل."},
-{q:"ما اسم بطل ديث نوت؟",a:["إل","لايت ياغامي","ريوك","مات"],c:1,h:"وجد دفتر الموت."},
-{q:"من كتب في دفتر الموت؟",a:["إل","لايت","ميسا","سويتشيرو"],c:1,h:"طالب ذكي."},
-{q:"ما اسم الشينيغامي الذي يرافق لايت؟",a:["ريم","ريوك","إل","نير"],c:1,h:"يحب التفاح."},
-{q:"ما اسم المحقق المنافس للايت؟",a:["إل","مات","ميلو","ريوك"],c:0,h:"يجلس بطريقة غريبة."},
-{q:"ما اسم بطل هجوم العمالقة؟",a:["ليفاي","إيرين","أرمين","جان"],c:1,h:"يحلم بالقضاء على العمالقة."},
-{q:"من هي صديقة إيرين المقربة؟",a:["هيستوريا","ساشا","ميكاسا","آني"],c:2,h:"تحمل وشاحاً أحمر."},
-{q:"ما اسم القائد الشهير في فيلق الاستطلاع؟",a:["ليفاي","كوني","جان","ماركو"],c:0,h:"قصير وقوي جداً."},
-{q:"ما اسم صديق إيرين الذكي؟",a:["راينر","أرمين","زيك","إروين"],c:1,h:"شعره أشقر."},
-{q:"ما اسم بطل قاتل الشياطين؟",a:["زينيتسو","إينوسكي","تانجيرو","غيو"],c:2,h:"لديه حاسة شم قوية."},
-{q:"ما اسم أخت تانجيرو؟",a:["شينوبو","نيزوكو","كاناو","ميتسوري"],c:1,h:"تحولت إلى شيطانة."},
-{q:"ما لون شعر زينيتسو؟",a:["أحمر","أصفر","أزرق","أسود"],c:1,h:"يستخدم تنفس الرعد."},
-{q:"ما اسم الهاشيرا الذي يستخدم تنفس الماء؟",a:["رينغوكو","غيو","تينغن","سانيمي"],c:1,h:"شخص هادئ."},
-{q:"ما اسم بطل جوجوتسو كايسن؟",a:["ميغومي","غوجو","يوجي إيتادوري","سوكونا"],c:2,h:"ابتلع إصبع سوكونا."},
-{q:"من هو المعلم ذو العصابة على عينيه؟",a:["غوجو ساتورو","نانامي","توغي","ماهيتو"],c:0,h:"يعتبر من أقوى السحرة."},
-{q:"من يسكن داخل يوجي؟",a:["غوجو","سوكونا","ميغومي","جونبي"],c:1,h:"ملك اللعنات."},
-{q:"ما اسم بطل بليتش؟",a:["رينجي","إيتشيغو","إيشيدا","بياكويا"],c:1,h:"شعره برتقالي."},
-{q:"ما اسم سيف إيتشيغو؟",a:["زانغيتسو","سينبونزاكورا","هيورينمارو","زابيمارو"],c:0,h:"زانباكتو خاص به."},
-{q:"ما اسم بطل هنتر x هنتر؟",a:["كيلوا","كورابيكا","غون","ليوريو"],c:2,h:"يبحث عن والده."},
-{q:"من هو صديق غون المقرب؟",a:["كيلوا","هيسوكا","جين","كرولو"],c:0,h:"من عائلة زولديك."},
-{q:"ما اسم بطل ون بنش مان؟",a:["جينوس","سايتاما","غارو","كينغ"],c:1,h:"يهزم خصومه بلكمة واحدة."},
-{q:"ما لون رأس سايتاما؟",a:["أحمر","أسود","أصلع","أبيض"],c:2,h:"ليس لديه شعر."},
-{q:"ما اسم بطل سولو ليفلينغ؟",a:["تشا هاي إن","سونغ جين وو","يو جين هو","غو غون هي"],c:1,h:"يبدأ كصياد ضعيف."},
-{q:"ما القوة التي يحصل عليها جين وو؟",a:["التحكم بالوقت","نظام يرفع مستواه","الطيران فقط","قراءة الأفكار"],c:1,h:"يصبح أقوى مع الخبرة."},
-{q:"ما اسم بطل بوكو نو هيرو؟",a:["باكوغو","تودوروكي","ميدوريا","أول مايت"],c:2,h:"لقبه ديكو."},
-{q:"من هو البطل رقم واحد في بداية بوكو نو هيرو؟",a:["إنديفور","أول مايت","هوكس","إيريزر"],c:1,h:"يقول: أنا هنا."},
-{q:"ما اسم بطل طوكيو غول؟",a:["كانيكي","أريما","هيدي","ياموري"],c:0,h:"شعره يتحول إلى الأبيض."},
-{q:"ما اسم منظمة الأكاتسوكي في ناروتو؟",a:["منظمة الأبطال","منظمة السحرة","منظمة الأكاتسوكي","منظمة الظلال"],c:2,h:"يرتدي أفرادها عباءات سوداء وسحباً حمراء."},
-{q:"من هو قائد الأكاتسوكي المعروف بباين؟",a:["ناغاتو","كونان","أوبيتو","مادارا"],c:0,h:"يتحكم بستة مسارات."},
-{q:"ما اسم أخ إدوارد في الخيميائي المعدني؟",a:["وينري","ألفونس","روزا","روك بيل"],c:1,h:"أخوه الأصغر."},
-{q:"ما اسم بطل سباي x فاميلي؟",a:["لويد","يور","داميان","فرانكي"],c:0,h:"جاسوس يُعرف باسم توايلايت."},
-{q:"ما قدرة أنيا في سباي x فاميلي؟",a:["الاختفاء","قراءة الأفكار","الطيران","التحكم بالنار"],c:1,h:"تستطيع سماع أفكار الآخرين."},
-{q:"ما اسم بطل هايكيو؟",a:["كاغياما","تسوكيشيما","هيناتا","أويكاوا"],c:2,h:"لاعب كرة طائرة قصير القامة."},
-{q:"ما الرياضة في أنمي هايكيو؟",a:["كرة القدم","كرة السلة","كرة الطائرة","التنس"],c:2,h:"تُلعب فوق شبكة."},
-{q:"ما اسم بطل المحقق كونان؟",a:["هيجي","شينتشي كودو","كايتو كيد","جين"],c:1,h:"يتحول إلى طفل صغير."},
-{q:"ما اسم الفتاة التي تساعد كونان؟",a:["ران","سونوكو","آي","كازوها"],c:0,h:"تعيش مع والدها كوغورو."}
+const questions=[
+["ما اسم بطل ناروتو؟",["ساسكي","ناروتو","كاكاشي","إيتاتشي"],1,"يحلم بأن يصبح الهوكاغي."],
+["ما اسم قرية ناروتو؟",["الرمل","المطر","الورق","الضباب"],2,"اسمها كونوها."],
+["من أخو ساسكي؟",["إيتاتشي","مادارا","أوبيتو","ناروتو"],0,"من عشيرة الأوتشيها."],
+["ما اسم والد ناروتو؟",["هيروزن","ميناتو","جيرايا","كاكاشي"],1,"الهوكاغي الرابع."],
+["ما الوحش داخل ناروتو؟",["التنين","كوراما","النمر","الذئب"],1,"الثعلب ذو التسعة ذيول."],
+["ما اسم بطل ون بيس؟",["زورو","سانجي","لوفي","أوسوب"],2,"قبعته من القش."],
+["ما حلم لوفي؟",["ملك القراصنة","طبيب","طباخ","بحار"],0,"يريد الوصول إلى ون بيس."],
+["من سياف طاقم لوفي؟",["نامي","زورو","تشوبر","فرانكي"],1,"يستخدم ثلاثة سيوف."],
+["ما فاكهة لوفي؟",["اللهب","الظلام","المطاط","الجليد"],2,"جسده يتمدد."],
+["ما اسم سفينة قبعة القش؟",["ميري","ثاوزند ساني","ريد فورس","أوروس"],1,"سفينة الشمس."],
+["من بطل هجوم العمالقة؟",["ليفاي","إيرين","أرمين","جان"],1,"يريد القضاء على العمالقة."],
+["من أقوى مقاتلي الاستطلاع؟",["ليفاي","ماركو","جان","فلوك"],0,"قصير وسريع."],
+["من قائد الاستطلاع؟",["إروين","راينر","كوني","جان"],0,"قائد شجاع."],
+["ما اسم أخت تانجيرو؟",["شينوبو","نيزوكو","كاناو","ميتسوري"],1,"تحولت إلى شيطان."],
+["من يستخدم تنفس الرعد؟",["زينيتسو","تانجيرو","غيو","رينغوكو"],0,"شعره أصفر."],
+["من قائد الشياطين؟",["أكازا","موزان","دوما","غيو"],1,"عدو صائدي الشياطين."],
+["من بطل ديمون سلاير؟",["زينيتسو","إينوسكي","تانجيرو","غيو"],2,"يستخدم تنفس الماء والشمس."],
+["من بطل دراغون بول؟",["فيجيتا","غوهان","غوكو","ترانكس"],2,"سايان يحب القتال."],
+["من أمير السايان؟",["غوكو","فيجيتا","برولي","غوتين"],1,"زوج بولما."],
+["ما اسم كرات الأمنيات؟",["كرات التنين","كرات القوة","كرات السايان","كرات الناميك"],0,"تستدعي شينرون."],
+["من ابن غوكو الأكبر؟",["غوتين","غوهان","ترانكس","باردوك"],1,"أصبح عالمًا."],
+["من بطل جوجوتسو كايسن؟",["غوجو","ميغومي","يوجي","سوكونا"],2,"ابتلع إصبعًا ملعونًا."],
+["من معلم يوجي؟",["نانامي","غوجو","غيـتو","تودو"],1,"يرتدي عصابة على عينيه."],
+["من يسكن داخل يوجي؟",["ماهيتو","سوكونا","غوجو","توجي"],1,"ملك اللعنات."],
+["ما تقنية غوجو؟",["اللانهاية","تنين الماء","الظل","اللهب"],0,"تجعل الاقتراب منه صعبًا."],
+["من بطل بليتش؟",["رينجي","إيتشيغو","إيشيدا","بياكويا"],1,"شعره برتقالي."],
+["ما اسم سيف إيتشيغو؟",["زانغيتسو","سينبونزاكورا","زابيمارو","هيورينمارو"],0,"زانباكتو خاص به."],
+["من بطل هنتر؟",["كيلوا","كورابيكا","غون","ليوريو"],2,"يبحث عن والده."],
+["من صديق غون؟",["كيلوا","هيسوكا","كرولو","إيلومي"],0,"من عائلة زولديك."],
+["ما اسم الطاقة في هنتر؟",["تشي","نين","تشاكرا","هاكي"],1,"نظام طاقة خاص."],
+["من بطل هايكيو؟",["كاغياما","هيناتا","تسوكيشيما","دايتشي"],1,"قصير ويحب الكرة الطائرة."],
+["ما الرياضة في هايكيو؟",["القدم","السلة","الطائرة","التنس"],2,"تلعب فوق شبكة."],
+["من بطل المحقق كونان؟",["هيجي","شينتشي","كايتو","جين"],1,"يتحول إلى طفل."],
+["ما اسم الفتاة التي تساعد كونان؟",["ران","سونوكو","آي","كازوها"],0,"تعيش مع والدها كوغورو."],
+["من بطل ون بنش مان؟",["جينوس","سايتاما","غارو","كينغ"],1,"يهزم خصومه بلكمة."],
+["من تلميذ سايتاما؟",["جينوس","كينغ","بانغ","غارو"],0,"سايبورغ."],
+["من بطل مذكرة الموت؟",["إل","لايت","ريوك","ميلو"],1,"عثر على دفتر غامض."],
+["من الشينيغامي الذي أسقط المذكرة؟",["ريم","ريوك","إل","نير"],1,"يحب التفاح."],
+["من المحقق الذي يواجه لايت؟",["إل","مات","ميلو","نير"],0,"يجلس بطريقة غريبة."],
+["من بطل أكاديمية بطلي؟",["باكوغو","تودوروكي","ميدوريا","أول مايت"],2,"لقبه ديكو."],
+["ما لقب أول مايت؟",["رمز السلام","ملك الظلال","البطل الأحمر","العملاق"],0,"أشهر أبطال المجتمع."],
+["ما قوة تودوروكي؟",["انفجار","نصف بارد نصف ساخن","ظل","نسخ"],1,"يستخدم الجليد والنار."],
+["من بطل سباي فاميلي؟",["لويد","داميان","فرانكي","يور"],0,"جاسوس اسمه توايلايت."],
+["ما قدرة أنيا؟",["قراءة الأفكار","الاختفاء","الطيران","النار"],0,"تسمع أفكار الآخرين."],
+["من بطل بوكو نو هيرو؟",["ديكو","ليفاي","غون","لوفي"],0,"اسمه ميدوريا."],
+["من صديق ناروتو ومنافسه؟",["ساسكي","كاكاشي","جيرايا","ميناتو"],0,"من عشيرة الأوتشيها."],
+["من معلم فريق ناروتو؟",["كاكاشي","إيتاتشي","أوروتشيمارو","ميناتو"],0,"يخفي إحدى عينيه."],
+["ما اسم أخ لوفي؟",["إيس","زورو","سانجي","بروك"],0,"يستخدم اللهب."],
+["من طبيب طاقم لوفي؟",["تشوبر","أوسوب","فرانكي","بروك"],0,"رنة صغيرة."],
+["من قائد فرقة الشياطين في ديمون سلاير؟",["أوباناي","أوبيتو","موزان","زينيتسو"],2,"أول الشياطين."]
 ];
 
-const pets = {
- tanjiro:{name:"تانجيرو",emoji:"🧒🏻⚔️"},
- levi:{name:"ليفاي",emoji:"🧑🏻‍✈️⚔️"},
- luffy:{name:"لوفي",emoji:"👦🏻🏴‍☠️"},
- naruto:{name:"ناروتو",emoji:"🥷🍥"},
- goku:{name:"غوكو",emoji:"👦🏻🐉"}
+const pets={
+tanjiro:{name:"تانجيرو",hair:"#28252b",shirt:"#287b52",accent:"#d7e5df"},
+levi:{name:"ليفاي",hair:"#4c3329",shirt:"#48546f",accent:"#e5e9ee"},
+luffy:{name:"لوفي",hair:"#34251e",shirt:"#b83232",accent:"#e8c35c"},
+naruto:{name:"ناروتو",hair:"#f3a21b",shirt:"#2876c9",accent:"#f5d34e"},
+goku:{name:"غوكو",hair:"#1d1a22",shirt:"#e56c25",accent:"#e9c64e"}
 };
-const PET_PRICE=50, SAVE_KEY="animeMasterSaveV2", PET_KEY="animeMasterPetsV2", SETTINGS_KEY="animeMasterSettingsV2";
-let player="", character="ناروتو", hearts=5, coins=50, level=0;
-let shuffledQuestions=[], usedHint=false, gameOver=false;
 
-function chooseCharacter(el){
- document.querySelectorAll(".character-choice").forEach(x=>x.classList.remove("selected"));
- el.classList.add("selected"); character=el.dataset.name;
+let player="",character="ناروتو",hearts=5,coins=50,level=0,deck=[],current=null,locked=false;
+const PRICE=50;
+const SAVE="animeMasterSaveFinal";
+const OWN="animeMasterOwnedFinal";
+const SETTINGS="animeMasterSettingsFinal";
+
+function choose(el){
+document.querySelectorAll(".character-choice").forEach(x=>x.classList.remove("selected"));
+el.classList.add("selected");
+character=el.dataset.name;
 }
-function showSection(id){
- ["start","game","end","profile","shop","settings"].forEach(x=>document.getElementById(x).classList.add("hidden"));
- document.getElementById(id).classList.remove("hidden");
- if(id==="profile")renderProfile();
- if(id==="shop")renderShop();
+function show(id){
+document.querySelectorAll(".panel").forEach(x=>x.classList.add("hidden"));
+document.getElementById(id).classList.remove("hidden");
+if(id==="profile")renderProfile();
+if(id==="shop")renderShop();
 }
-function shuffleQuestions(){
- shuffledQuestions=[...questions];
- for(let i=shuffledQuestions.length-1;i>0;i--){
-  const j=Math.floor(Math.random()*(i+1));
-  [shuffledQuestions[i],shuffledQuestions[j]]=[shuffledQuestions[j],shuffledQuestions[i]];
- }
+function shuffle(){
+deck=[...questions];
+for(let i=deck.length-1;i>0;i--){
+let j=Math.floor(Math.random()*(i+1));
+[deck[i],deck[j]]=[deck[j],deck[i]];
+}
 }
 function update(){
- document.getElementById("hearts").textContent=hearts;
- document.getElementById("coins").textContent=coins;
- document.getElementById("level").textContent=Math.min(level+1,50);
- updateProfileStats();
+document.getElementById("hearts").textContent=hearts;
+document.getElementById("coins").textContent=coins;
+document.getElementById("level").textContent=level+1;
+updateProfile();
+save();
 }
-function updateProfileStats(){
- document.getElementById("profileName").textContent=player||"لاعب";
- document.getElementById("profileCharacter").textContent=character;
- document.getElementById("profileCoins").textContent=coins;
- document.getElementById("profileLevel").textContent=level+1;
-}
-function showGame(){
- gameOver=false;
- ["start","end","profile","shop","settings"].forEach(x=>document.getElementById(x).classList.add("hidden"));
- document.getElementById("game").classList.remove("hidden");
- document.getElementById("welcome").textContent="أهلاً "+player+" — شخصيتك "+character;
- update();showQuestion();
+function updateProfile(){
+document.getElementById("profileName").textContent=player||"لاعب";
+document.getElementById("profileCharacter").textContent=character;
+document.getElementById("profileCoins").textContent=coins;
+document.getElementById("profileLevel").textContent=level+1;
 }
 function startGame(){
- const name=document.getElementById("playerName").value.trim();
- if(!name){alert("اكتب اسم اللاعب أولاً!");return;}
- if(!confirm("بدء مغامرة جديدة؟ سيبدأ التقدم من المرحلة الأولى."))return;
- player=name;hearts=5;coins=50;level=0;shuffleQuestions();save();showGame();
+player=document.getElementById("playerName").value.trim()||"لاعب";
+hearts=5;coins=50;level=0;locked=false;
+shuffle();update();show("game");nextQuestion();
 }
 function continueGame(){
- const raw=localStorage.getItem(SAVE_KEY);
- if(!raw){alert("لا يوجد حفظ سابق على هذا الجهاز.");return;}
- try{
-  const s=JSON.parse(raw);
-  if(!s.player||!Array.isArray(s.shuffledQuestions))throw new Error("invalid");
-  player=s.player;character=s.character||"ناروتو";hearts=Number(s.hearts)||0;coins=Number(s.coins)||0;level=Number(s.level)||0;shuffledQuestions=s.shuffledQuestions;
-  document.getElementById("playerName").value=player;showGame();
- }catch(e){alert("تعذر قراءة الحفظ. ابدأ مغامرة جديدة.");}
+let data;
+try{data=JSON.parse(localStorage.getItem(SAVE));}catch(e){}
+if(!data){alert("لا يوجد حفظ سابق بعد.");return;}
+player=data.player||"لاعب";character=data.character||"ناروتو";
+hearts=data.hearts??5;coins=data.coins??50;level=data.level??0;
+shuffle();update();show("game");nextQuestion();
 }
-function showQuestion(){
- if(level>=shuffledQuestions.length){finish(true);return;}
- if(hearts<=0){finish(false);return;}
- usedHint=false;
- const q=shuffledQuestions[level];
- document.getElementById("question").textContent="السؤال "+(level+1)+": "+q.q;
- document.getElementById("message").textContent="";
- const box=document.getElementById("answers");box.innerHTML="";
- q.a.forEach((answer,i)=>{
-  const b=document.createElement("button");b.className="answer";b.textContent=answer;
-  b.onclick=()=>checkAnswer(i);box.appendChild(b);
- });
- update();
+function nextQuestion(){
+if(hearts<=0){finish(false);return;}
+if(level>=questions.length){finish(true);return;}
+if(deck.length===0)shuffle();
+current=deck.pop();locked=false;
+document.getElementById("message").textContent="";
+document.getElementById("question").textContent=current[0];
+let box=document.getElementById("answers");box.innerHTML="";
+let order=[0,1,2,3].sort(()=>Math.random()-.5);
+order.forEach(index=>{
+let b=document.createElement("button");
+b.className="answer";b.textContent=current[1][index];
+b.onclick=()=>answer(b,index);
+box.appendChild(b);
+});
+update();
 }
-function checkAnswer(index){
- if(gameOver)return;
- const q=shuffledQuestions[level],buttons=document.querySelectorAll(".answer");
- buttons.forEach(b=>b.disabled=true);
- if(index===q.c){buttons[index].classList.add("correct");coins+=2;document.getElementById("message").textContent="إجابة صحيحة! +2 عملة 🪙";}
- else{buttons[index].classList.add("wrong");buttons[q.c].classList.add("correct");hearts=Math.max(0,hearts-1);document.getElementById("message").textContent="إجابة خاطئة! خسرت قلباً ❤️";}
- level++;save();update();
- if(hearts<=0||level>=shuffledQuestions.length)setTimeout(()=>finish(level>=shuffledQuestions.length),1100);
- else setTimeout(showQuestion,1300);
+function answer(button,index){
+if(locked)return;
+locked=true;
+let buttons=document.querySelectorAll(".answer");
+buttons.forEach(b=>b.disabled=true);
+if(index===current[2]){
+button.classList.add("correct");
+coins+=2;level++;
+document.getElementById("message").textContent="إجابة صحيحة! +2 عملة ⭐";
+}else{
+button.classList.add("wrong");
+hearts--;
+buttons.forEach(b=>{if(b.textContent===current[1][current[2]])b.classList.add("correct");});
+document.getElementById("message").textContent="إجابة خاطئة! ❤️ خسرت قلبًا.";
+}
+update();
+if(level%5===0&&level>0)playMusic();
+setTimeout(nextQuestion,1100);
 }
 function hint(){
- if(gameOver||level>=shuffledQuestions.length)return;
- if(usedHint){alert("استخدمت التلميح لهذا السؤال بالفعل.");return;}
- if(coins<10){alert("تحتاج إلى 10 عملات للتلميح.");return;}
- coins-=10;usedHint=true;document.getElementById("message").textContent="💡 تلميح: "+shuffledQuestions[level].h;update();save();
+if(!current||locked)return;
+if(coins<5){alert("تحتاج إلى 5 عملات.");return;}
+coins-=5;update();
+document.getElementById("message").textContent="💡 "+current[3];
 }
 function buyHeart(){
- if(gameOver)return;
- if(hearts>=5){alert("لديك الحد الأقصى من القلوب!");return;}
- if(coins<15){alert("تحتاج إلى 15 عملة لشراء قلب.");return;}
- coins-=15;hearts++;document.getElementById("message").textContent="تم شراء قلب بنجاح! ❤️";update();save();
-}
-function save(){
- localStorage.setItem(SAVE_KEY,JSON.stringify({player,character,hearts,coins,level,shuffledQuestions}));
-}
-function saveAndExit(){
- save();alert("تم حفظ تقدمك على هذا الجهاز.");showSection("start");
+if(coins<15){alert("تحتاج إلى 15 عملة.");return;}
+if(hearts>=5){alert("قلوبك كاملة بالفعل!");return;}
+coins-=15;hearts++;update();
+document.getElementById("message").textContent="اشتريت قلبًا جديدًا ❤️";
 }
 function finish(won){
- gameOver=true;save();showSection("end");
- document.getElementById("endTitle").textContent=won?"🏆 أنت بطل الأنمي!":"💔 انتهت قلوبك!";
- document.getElementById("endText").textContent="وصلت إلى المرحلة "+level+" وجمعت "+coins+" عملة.";
+show("end");
+document.getElementById("endTitle").textContent=won?"🏆 أنت بطل الأنمي!":"💔 انتهت قلوبك!";
+document.getElementById("endText").textContent="وصلت إلى المرحلة "+(level+1)+" وجمعت "+coins+" عملة.";
 }
-function restartGame(){
- if(!confirm("بدء مغامرة جديدة؟ سيبقى رفاقك الذين اشتريتهم، لكن سيبدأ تقدم المراحل من جديد."))return;
- hearts=5;coins=50;level=0;gameOver=false;shuffleQuestions();save();showGame();
+function restart(){
+hearts=5;coins=50;level=0;shuffle();update();show("game");nextQuestion();
 }
-function getOwnedPets(){
- try{return JSON.parse(localStorage.getItem(PET_KEY)||"[]");}catch(e){return [];}
+function save(){
+localStorage.setItem(SAVE,JSON.stringify({player,character,hearts,coins,level}));
 }
-function renderShop(){
- document.getElementById("shopCoins").textContent=coins;
- const box=document.getElementById("shopItems");box.innerHTML="";
- Object.entries(pets).forEach(([id,p])=>{
-  const owned=getOwnedPets().includes(id),card=document.createElement("div");card.className="shop-card";
-  card.innerHTML='<span class="pet-face">'+p.emoji+'</span><h3>'+p.name+'</h3><p>50 🪙</p>';
-  const btn=document.createElement("button");btn.textContent=owned?"تم الشراء ✓":"شراء";
-  btn.disabled=owned;btn.onclick=()=>buyPet(id);card.appendChild(btn);box.appendChild(card);
- });
+function owned(){
+try{return JSON.parse(localStorage.getItem(OWN)||"[]");}catch(e){return [];}
 }
-function buyPet(id){
- const owned=getOwnedPets();
- if(owned.includes(id)){alert("هذا الرفيق ملكك بالفعل!");return;}
- if(coins<PET_PRICE){alert("ليس لديك 50 عملة كافية.");return;}
- coins-=PET_PRICE;owned.push(id);localStorage.setItem(PET_KEY,JSON.stringify(owned));
- save();update();renderShop();alert("مبروك! أصبح "+pets[id].name+" رفيقك الجديد! 🥰");
+function avatar(key){
+let c=pets[key]||{hair:"#4a2d65",shirt:"#4655a0",accent:"#d6b5ff"};
+return `<div class="avatar" style="--hair:${c.hair};--shirt:${c.shirt};--accent:${c.accent}">
+<div class="hair"></div><div class="face"></div><div class="neck"></div>
+<div class="scarf"></div><div class="arm left"><i class="hand"></i></div>
+<div class="arm right"><i class="hand"></i></div><div class="torso"></div>
+<div class="belt"></div><div class="leg left"><i class="boot"></i></div>
+<div class="leg right"><i class="boot"></i></div><div class="shadow"></div></div>`;
+}
+function mainKey(){
+let map={"ناروتو":"naruto","غوكو":"goku","ميكاسا":"levi","نيزوكو":"tanjiro","لايت":"levi","نامي":"naruto","غون":"goku","سايتاما":"levi","روكيا":"tanjiro","جين وو":"levi"};
+return map[character]||"naruto";
 }
 function renderProfile(){
- updateProfileStats();
- const box=document.getElementById("profilePets");box.innerHTML="";
- getOwnedPets().forEach(id=>{
-  if(!pets[id])return;
-  const card=document.createElement("div");card.className="pet-card";
-  card.innerHTML='<span class="pet">'+pets[id].emoji+'</span><h3>'+pets[id].name+'</h3>';
-  box.appendChild(card);
- });
+updateProfile();
+document.getElementById("mainAvatar").innerHTML=avatar(mainKey());
+let box=document.getElementById("profilePets");box.innerHTML="";
+owned().forEach(id=>{
+if(!pets[id])return;
+let card=document.createElement("div");card.className="pet-card";
+card.innerHTML=avatar(id)+"<h3>"+pets[id].name+"</h3>";
+box.appendChild(card);
+});
+}
+function renderShop(){
+document.getElementById("shopCoins").textContent=coins;
+let box=document.getElementById("shopItems");box.innerHTML="";
+Object.keys(pets).forEach(id=>{
+let p=pets[id],has=owned().includes(id);
+let card=document.createElement("div");card.className="shop-card";
+card.innerHTML=avatar(id)+"<h3>"+p.name+"</h3><p>50 🪙</p>";
+let b=document.createElement("button");b.textContent=has?"تم الشراء ✓":"شراء";
+b.disabled=has;b.onclick=()=>buyPet(id);
+card.appendChild(b);box.appendChild(card);
+});
+}
+function buyPet(id){
+if(owned().includes(id))return;
+if(coins<PRICE){alert("ليس لديك 50 عملة كافية.");return;}
+coins-=PRICE;
+let list=owned();list.push(id);
+localStorage.setItem(OWN,JSON.stringify(list));
+update();renderShop();
+alert("مبروك! أصبحت "+pets[id].name+" رفيقك!");
+}
+function setTheme(value){
+document.body.style.background=value==="light"?"#eee8fa":"#171329";
+document.body.style.color=value==="light"?"#241b35":"white";
+localStorage.setItem(SETTINGS,JSON.stringify({theme:value,sound:document.getElementById("soundToggle").checked}));
 }
 function saveSettings(){
- const s={sound:document.getElementById("soundToggle").checked,language:document.getElementById("languageSelect").value};
- localStorage.setItem(SETTINGS_KEY,JSON.stringify(s));
+localStorage.setItem(SETTINGS,JSON.stringify({theme:document.getElementById("themeSelect").value,sound:document.getElementById("soundToggle").checked}));
+if(!document.getElementById("soundToggle").checked)document.getElementById("music").pause();
 }
-function setTheme(theme){
- document.body.classList.toggle("light",theme==="light");
- document.getElementById("themeSelect").value=theme;
- const s=JSON.parse(localStorage.getItem(SETTINGS_KEY)||"{}");s.theme=theme;localStorage.setItem(SETTINGS_KEY,JSON.stringify(s));
+const songs=["38534292-japanese-164989.mp3","anime-song-2.mp3","anime-song-3.mp3","anime-song-4.mp3","anime-song-5.mp3","anime-song-6.mp3","anime-song-7.mp3","anime-song-8.mp3","anime-song-9.mp3","anime-song-10.mp3"];
+function playMusic(){
+let settings={};try{settings=JSON.parse(localStorage.getItem(SETTINGS)||"{}");}catch(e){}
+if(settings.sound===false)return;
+let index=Math.min(Math.floor(level/5)-1,songs.length-1);
+if(index<0)index=0;
+let audio=document.getElementById("music");
+audio.src=songs[index];audio.play().catch(()=>{});
 }
-function loadSettings(){
- let s={};try{s=JSON.parse(localStorage.getItem(SETTINGS_KEY)||"{}");}catch(e){}
- document.getElementById("soundToggle").checked=s.sound!==false;
- document.getElementById("languageSelect").value=s.language||"ar";
- setTheme(s.theme||"dark");
+function toggleMusic(){
+let audio=document.getElementById("music");
+if(!audio.paused){audio.pause();return;}
+document.getElementById("soundToggle").checked=true;
+saveSettings();playMusic();
 }
-loadSettings();
-renderShop();
+(function loadSettings(){
+let s={};try{s=JSON.parse(localStorage.getItem(SETTINGS)||"{}");}catch(e){}
+document.getElementById("themeSelect").value=s.theme||"dark";
+document.getElementById("soundToggle").checked=s.sound!==false;
+if(s.theme==="light")setTheme("light");
+})();
 </script>
 </body>
 </html>
-'''
-
-path = Path("/mnt/data/anime_master_clean.html")
-path.write_text(html, encoding="utf-8")
-print(f"Created {path} ({path.stat().st_size} bytes)")
