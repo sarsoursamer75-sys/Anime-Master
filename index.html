@@ -691,8 +691,6 @@ function updateMusic(){
 }
 
 </script>
-</body>
-</html>
 const SONG_URLS={
  naruto:[],
  onepiece:[],
@@ -705,4 +703,14 @@ const SONG_URLS={
  attack:["music/attack.mp3"],
  demon:["music/demon.mp3"],
  dragon:["music/dragon.mp3"]
-};
+<!-- كود الأغنية هنا -->
+<audio id="animeMusic" loop>
+  <source src="38534292-japanese-164989.mp3" type="audio/mpeg">
+</audio>
+
+<button onclick="document.getElementById('animeMusic').play()">
+  🎵 تشغيل الأغنية
+</button>
+
+</body>
+</html>
